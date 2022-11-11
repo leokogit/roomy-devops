@@ -1,0 +1,28 @@
+---
+- name: Istall Aps
+  hosts: ubuntu_vms
+  remote_user: ubuntu
+  tasks:
+    - block:
+        - name: Get aisleriot_3.22.9-1_amd64.deb
+          get_url:
+            url: "http://ftp.de.debian.org/debian/pool/main/a/aisleriot/aisleriot_3.22.9-1_amd64.deb"
+            dest: "/tmp/aisleriot_3.22.9-1_amd64.deb"
+        - name: ensure file exists
+          stat:
+            path: /tmp/aisleriot_3.22.9-1_amd64.deb
+          register: file_exist
+          when: file_exist.stat.exists is defined
+#         - name: Change file permissions
+#           file:
+#             path: /tmp/aisleriot_3.22.9-1_amd64.deb
+#             mode: '0644'
+        - name: Install а .deb package
+          become: true
+          apt:
+            deb: /tmp/aisleriot_3.22.9-1_amd64.deb
+          register: install_result
+        - name: debug data
+          debug:
+            msg: "Install ok"
+          when: install_result is defined

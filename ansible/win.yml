@@ -1,0 +1,26 @@
+---
+- name: Istall Aps
+  hosts: win1
+  tasks:
+    - name: Create directory for apps
+      win_file:
+        path: C:\apps
+        state: directory
+    - name: Download the 7-Zip package
+      win_get_url:
+        url: https://www.7-zip.org/a/7z2201-x64.exe
+        dest: C:\apps
+    -  name: run an executable command . install 7zip
+       win_command: cmd.exe /c start c:\apps\7zip\7z2201-x64.exe /S
+    - name: Create directory for download files
+      win_file:
+        path: C:\download
+        state: directory
+    - name: Download the pdf files
+      win_get_url:
+        url: https://github.com/leokogit/apps/blob/main/regexp.pdf
+        dest: C:\download
+    - name: message
+      win_msg:
+        display_seconds: 60
+        msg: All apps are installed.

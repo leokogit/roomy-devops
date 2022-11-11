@@ -1,0 +1,8 @@
+---
+- name: Istall PostgreSQL
+  hosts: test-dbserver1
+  become: true
+  become_user: root
+  remote_user: ubuntu
+  roles:
+   - postgres

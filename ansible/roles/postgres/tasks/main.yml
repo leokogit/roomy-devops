@@ -1,0 +1,89 @@
+---
+- name: Update apt cache
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Ensure PostgreSQL Python libraries are installed.
+  apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Ensure PostgreSQL packages are installed.
+  apt:
+    name: "{{ pg_packages }}"
+    state: present
+
+- name: Install the PostgreSQL packages
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - "{{ pg_packages }}"
+  environment: "{{ env }}"
+
+- name: Set PostgreSQL environment variables.
+  template:
+    src: postgres.sh
+    dest: /etc/profile.d/postgres.sh
+    mode: 0644
+  notify: restart postgresql
+
+- name: Ensure PostgreSQL data directory exists.
+  file:
+    path: /usr/lib/postgresql/12/bin/main
+    owner: postgres
+    group: postgres
+    state: directory
+    mode: 0700
+
+- name: Check if PostgreSQL database is initialized.
+  stat:
+    path: "/usr/lib/postgresql/12/bin/main/PG_VERSION"
+  register: postgres_data
+
+- name: "Initialize PostgreSQL"
+  command: "/usr/lib/postgresql/12/bin/initdb -D /usr/lib/postgresql/12/bin/main"
+  become: true
+  become_user: postgres
+  when: not postgres_data.stat.exists
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: "Start and enable services"
+  service: "name={{ item }} state=started enabled=yes"
+  with_items:
+    - postgresql
+
+- name: "Create app database"
+  postgresql_db:
+    state: present
+    name: "{{ db_name }}"
+  become: true
+  become_user: postgres
+
+- name: "Create db user"
+  postgresql_user:
+    state: present
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+  become: true
+  become_user: postgres
+
+- name: "Grant db user access to app db"
+  postgresql_privs:
+    type: database
+    database: "{{ db_name }}"
+    roles: "{{ db_user }}"
+    grant_option: true
+    privs: all
+  become: true
+  become_user: postgres
+
+- name: "Allow md5 connection for the db user"
+  postgresql_pg_hba:
+    dest: "/etc/postgresql/12/main/pg_hba.conf"
+    contype: host
+    databases: all
+    method: md5
+    users: "{{ db_user }}"
+    create: true
+  become: true
+  become_user: postgres
+  notify: restart postgresql

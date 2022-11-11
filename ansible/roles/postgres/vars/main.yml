@@ -1,0 +1,15 @@
+---
+pg_packages:
+  - postgresql
+  - postgresql-contrib
+  # for the ansible module
+  - python3-psycopg2
+env:
+  RUNLEVEL: 1
+pg_service: postgresql
+pg_config_dir: "/etc/postgresql/{{ _pg_version }}/main"
+pg_data_dir: "/var/lib/postgresql/{{ _pg_version }}/main"
+
+db_user: app1user
+db_password: app1user
+db_name: app1
