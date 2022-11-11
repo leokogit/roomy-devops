@@ -1,7 +1,0 @@
-access_key:
-  id: ajevq2o7mjpvjsjej0kv
-  service_account_id: ajetcanm6a6iiincmnsq
-  created_at: "2022-11-09T13:59:20.569493589Z"
-  description: this key is for my bucket
-  key_id: YCAJEj8KsI17qKrKvVqmNE2s-
-secret: YCNv0CfxtfIVqNDds4F2S2UxUpe6D3y_oI03WWAs
